@@ -17,7 +17,7 @@ public class ProjectMemberController {
 
     private final ProjectMemberService projectMemberService;
 
-    @PostMapping("/add-member")
+    @PostMapping
     public ResponseEntity<ProjectMemberRes> addMember(
             @PathVariable Long projectId,
             @RequestBody AddMemberReq request,
@@ -30,7 +30,7 @@ public class ProjectMemberController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @DeleteMapping("/remove-member/{userId}")
+    @DeleteMapping("/{userId}")
     public ResponseEntity<Void> removeMember(
             @PathVariable Long projectId,
             @PathVariable("userId") Long userIdToRemove,
