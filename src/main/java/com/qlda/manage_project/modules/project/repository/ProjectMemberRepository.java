@@ -21,6 +21,6 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Lo
     long countByProjectIdAndIsDeletedFalse(Long projectId);
 
     @Modifying
-    @Query("UPDATE ProjectMember pm SET pm.is_deleted = true WHERE pm.id = :id")
+    @Query("UPDATE ProjectMember pm SET pm.isDeleted = true WHERE pm.id = :id")
     void deleteMember(@Param("id") Long id);
 }

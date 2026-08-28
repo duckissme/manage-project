@@ -1,7 +1,0 @@
-package com.qlda.manage_project.common.exception;
-
-public class EntityNotFoundException extends RuntimeException{
-    public EntityNotFoundException(String message) {
-        super(message);
-    }
-}
