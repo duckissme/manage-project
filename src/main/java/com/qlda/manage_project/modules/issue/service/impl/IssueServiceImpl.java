@@ -1,5 +1,6 @@
 package com.qlda.manage_project.modules.issue.service.impl;
 
+import com.qlda.manage_project.common.exception.ForbiddenException;
 import com.qlda.manage_project.common.exception.NotFoundException;
 import com.qlda.manage_project.modules.issue.converter.IssueConverter;
 import com.qlda.manage_project.modules.issue.dto.request.IssueCreateRequest;
@@ -12,6 +13,9 @@ import com.qlda.manage_project.modules.issue.event.IssueUpdatedEvent;
 import com.qlda.manage_project.modules.issue.repository.IssueRepository;
 import com.qlda.manage_project.modules.issue.repository.ProjectSequenceRepository;
 import com.qlda.manage_project.modules.issue.service.IssueService;
+import com.qlda.manage_project.modules.project.entity.ProjectMember;
+import com.qlda.manage_project.modules.project.enums.ProjectRole;
+import com.qlda.manage_project.modules.project.repository.ProjectMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -27,6 +31,7 @@ import java.util.Objects;
 public class IssueServiceImpl implements IssueService {
     private final IssueRepository issueRepository;
     private final ProjectSequenceRepository sequenceRepository;
+    private final ProjectMemberRepository projectMemberRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final IssueConverter issueConverter;
 
@@ -122,13 +127,28 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Transactional
-    public void deleteIssue(Long issueId) {
+    public void deleteIssue(Long issueId, Long actorId) {
         Issue issue = issueRepository.findById(issueId).orElseThrow(() -> new NotFoundException("Không tìm thấy Issue"));
+
+        ProjectMember member = projectMemberRepository.findByProjectIdAndUserIdAndIsDeletedFalse(issue.getProjectId(), actorId)
+                .orElseThrow(() -> new NotFoundException("Thành viên này không tồn tại trong dự án"));
+
+        if (ProjectRole.OWNER != member.getProjectRole()
+                && ProjectRole.MANAGER != member.getProjectRole()) {
+            throw new ForbiddenException("Chỉ OWNER hoặc MANAGER mới có quyền xóa Issue");
+        }
 
         int updatedRows = issueRepository.softDeleteByIdAndVersion(issue.getId(), issue.getVersion());
 
         if (updatedRows == 0) {
             throw new ObjectOptimisticLockingFailureException(Issue.class, issueId);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public IssueResponse viewDetailIssue(Long issueId){
+        Issue issue = issueRepository.findById(issueId).orElseThrow(() -> new NotFoundException("Không tìm thấy Issue"));
+
+        return issueConverter.mapToResponse(issue);
     }
 }

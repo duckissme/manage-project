@@ -43,8 +43,16 @@ public class IssueController {
     }
 
     @DeleteMapping("/issues/{issueId}")
-    public ResponseEntity<Void> deleteIssue(@PathVariable Long issueId) {
-        issueService.deleteIssue(issueId);
+    public ResponseEntity<Void> deleteIssue(@PathVariable Long issueId, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        Long userId = customUserDetails.getId();
+
+        issueService.deleteIssue(issueId, userId);
         return ResponseEntity.noContent().build(); // HTTP 204
+    }
+
+    @GetMapping("/ssues/{issueId}")
+    public ResponseEntity<IssueResponse> viewDetailIssue(@PathVariable Long issueId) {
+        IssueResponse response = issueService.viewDetailIssue(issueId);
+        return ResponseEntity.ok(response);
     }
 }

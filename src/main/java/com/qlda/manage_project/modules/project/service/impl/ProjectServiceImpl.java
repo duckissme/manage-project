@@ -83,7 +83,7 @@ public class ProjectServiceImpl implements ProjectService {
         ProjectMember currentUserMember = projectMemberRepository.findByProjectIdAndUserIdAndIsDeletedFalse(projectId, currentUserId)
                 .orElseThrow(() -> new ForbiddenException("Bạn không phải là thành viên của dự án này"));
 
-        if (currentUserMember.getProjectRole() != ProjectRole.OWNER) {
+        if (ProjectRole.OWNER != currentUserMember.getProjectRole()) {
             throw new ForbiddenException("Hành động bị từ chối: Chỉ OWNER mới có quyền xóa dự án");
         }
 
@@ -138,9 +138,9 @@ public class ProjectServiceImpl implements ProjectService {
         ProjectMember currentUserMember = projectMemberRepository.findByProjectIdAndUserIdAndIsDeletedFalse(projectId, currentUserId)
                 .orElseThrow(() -> new ForbiddenException("Bạn không phải là thành viên của dự án này"));
 
-        if (currentUserMember.getProjectRole() != ProjectRole.OWNER
-                && currentUserMember.getProjectRole() != ProjectRole.MANAGER) {
-            throw new ForbiddenException("Hành động bị từ chối: Chỉ OWNER hoặc MANAGER mới có quyền chỉnh sửa dự án");
+        if (ProjectRole.OWNER != currentUserMember.getProjectRole()
+                && ProjectRole.MANAGER != currentUserMember.getProjectRole()) {
+            throw new ForbiddenException("Chỉ OWNER hoặc MANAGER mới có quyền chỉnh sửa dự án");
         }
 
         project.setName(request.getName());

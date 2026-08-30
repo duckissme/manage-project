@@ -36,9 +36,9 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
         ProjectMember currentUserMember = projectMemberRepository.findByProjectIdAndUserIdAndIsDeletedFalse(projectId, currentUserId)
                 .orElseThrow(() -> new ForbiddenException("Bạn không phải là thành viên của dự án này"));
 
-        if (currentUserMember.getProjectRole() != ProjectRole.OWNER
-                && currentUserMember.getProjectRole() != ProjectRole.MANAGER) {
-            throw new ForbiddenException("Bạn không có quyền thêm thành viên (Yêu cầu OWNER hoặc MANAGER)");
+        if (ProjectRole.OWNER != currentUserMember.getProjectRole()
+                && ProjectRole.MANAGER != currentUserMember.getProjectRole()) {
+            throw new ForbiddenException("Chỉ OWNER hoặc MANAGER mới có quyền thêm thành viên");
         }
 
         UserEntity userToAdd = userRepository.findById(request.getUserIdToAdd())
@@ -73,8 +73,8 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
         ProjectMember currentUserMember = projectMemberRepository.findByProjectIdAndUserIdAndIsDeletedFalse(projectId, currentUserId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy dự án hoặc bạn không có quyền truy cập"));
 
-        if (currentUserMember.getProjectRole() != ProjectRole.OWNER
-                && currentUserMember.getProjectRole() != ProjectRole.MANAGER) {
+        if (ProjectRole.OWNER != currentUserMember.getProjectRole()
+                && ProjectRole.MANAGER != currentUserMember.getProjectRole()) {
             throw new ForbiddenException("Chỉ OWNER hoặc MANAGER mới có quyền gỡ thành viên");
         }
 

@@ -9,5 +9,7 @@ public interface IssueService {
 
     IssueResponse updateIssue(Long issueId, IssueUpdateRequest request, Long actorId);
 
-    void deleteIssue(Long issueId);
+    void deleteIssue(Long issueId, Long userId);
+
+    IssueResponse viewDetailIssue(Long issueId);
 }
