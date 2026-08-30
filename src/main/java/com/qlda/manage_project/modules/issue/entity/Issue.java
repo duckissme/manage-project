@@ -4,6 +4,7 @@ import com.qlda.manage_project.modules.issue.enums.IssuePriority;
 import com.qlda.manage_project.modules.issue.enums.IssueStatus;
 import com.qlda.manage_project.modules.issue.enums.IssueType;
 import com.qlda.manage_project.modules.project.entity.Project;
+import com.qlda.manage_project.modules.sprint.entity.Sprint;
 import com.qlda.manage_project.modules.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -34,8 +35,9 @@ public class Issue {
     @JoinColumn(name = "project_id", insertable = false, updatable = false)
     private Project project;
 
-    @Column(name = "sprint_id")
-    private Long sprintId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sprint_id", nullable = true)
+    private Sprint sprint;
 
     @Column(name = "issue_key", nullable = false, unique = true)
     private String issueKey;

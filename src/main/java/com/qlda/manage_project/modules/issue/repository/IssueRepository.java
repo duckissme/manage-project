@@ -15,4 +15,11 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
     @Modifying
     @Query("UPDATE Issue i SET i.isDeleted = true, i.version = i.version + 1 WHERE i.id = :id AND i.version = :version")
     int softDeleteByIdAndVersion(@Param("id") Long id, @Param("version") Integer version);
+
+    List<Issue> findByProjectIdAndSprintIdInAndIsDeletedFalseOrderByPriorityDesc(
+            Long projectId, List<Long> sprintIds);
+
+    @Modifying
+    @Query("UPDATE Issue i SET i.sprint = null WHERE i.sprint.id = :sprintId AND i.projectId = :projectId")
+    void clearSprintIdForIssues(@Param("sprintId") Long sprintId, @Param("projectId") Long projectId);
 }

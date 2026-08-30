@@ -74,7 +74,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public void deleteProject(Long currentUserId, Long projectId) {
-        Project project = projectRepository.findById(projectId)
+        projectRepository.findById(projectId)
                 .filter(p -> !p.isDeleted())
                 .orElseThrow(() -> new ProjectNotFoundException("Không tìm thấy dự án với ID: " + projectId));
 
@@ -82,7 +82,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .orElseThrow(() -> new ForbiddenException("Bạn không phải là thành viên của dự án này"));
 
         if (ProjectRole.OWNER != currentUserMember.getProjectRole()) {
-            throw new ForbiddenException("Hành động bị từ chối: Chỉ OWNER mới có quyền xóa dự án");
+            throw new ForbiddenException("Chỉ OWNER hoặc MANAGER mới có quyền thêm thành viên");
         }
 
         projectRepository.deleteProject(projectId);
