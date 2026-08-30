@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface IssueRepository extends JpaRepository<Issue, Long> {
-    List<Issue> findByProjectIdAndSprintIdIsNull(Long projectId);
+    List<Issue> findByProjectIdAndSprintIsNullAndIsDeletedFalseOrderByCreatedAtDesc(Long projectId);
 
     @Modifying
     @Query("UPDATE Issue i SET i.isDeleted = true, i.version = i.version + 1 WHERE i.id = :id AND i.version = :version")

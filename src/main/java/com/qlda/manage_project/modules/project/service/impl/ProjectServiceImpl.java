@@ -12,6 +12,7 @@ import com.qlda.manage_project.modules.project.entity.Project;
 import com.qlda.manage_project.modules.project.entity.ProjectMember;
 import com.qlda.manage_project.modules.project.enums.ProjectRole;
 import com.qlda.manage_project.modules.project.enums.ProjectStatus;
+import com.qlda.manage_project.modules.project.exception.ProjectNotFoundException;
 import com.qlda.manage_project.modules.project.repository.ProjectMemberRepository;
 import com.qlda.manage_project.modules.project.repository.ProjectRepository;
 import com.qlda.manage_project.modules.project.service.ProjectService;
@@ -74,11 +75,8 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     public void deleteProject(Long currentUserId, Long projectId) {
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy dự án với ID: " + projectId));
-
-        if (project.isDeleted()) {
-            throw new NotFoundException("Dự án này đã bị xóa từ trước");
-        }
+                .filter(p -> !p.isDeleted())
+                .orElseThrow(() -> new ProjectNotFoundException("Không tìm thấy dự án với ID: " + projectId));
 
         ProjectMember currentUserMember = projectMemberRepository.findByProjectIdAndUserIdAndIsDeletedFalse(projectId, currentUserId)
                 .orElseThrow(() -> new ForbiddenException("Bạn không phải là thành viên của dự án này"));
@@ -95,7 +93,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         Project project = projectRepository.findById(projectId)
                 .filter(p -> !p.isDeleted())
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy dự án với ID: " + projectId));
+                .orElseThrow(() -> new ProjectNotFoundException("Không tìm thấy dự án với ID: " + projectId));
 
         boolean isMember = projectMemberRepository.existsByProjectIdAndUserIdAndIsDeletedFalse(projectId, currentUserId);
         if (!isMember) {
@@ -133,7 +131,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         Project project = projectRepository.findById(projectId)
                 .filter(p -> !p.isDeleted())
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy dự án với ID: " + projectId));
+                .orElseThrow(() -> new ProjectNotFoundException("Không tìm thấy dự án với ID: " + projectId));
 
         ProjectMember currentUserMember = projectMemberRepository.findByProjectIdAndUserIdAndIsDeletedFalse(projectId, currentUserId)
                 .orElseThrow(() -> new ForbiddenException("Bạn không phải là thành viên của dự án này"));

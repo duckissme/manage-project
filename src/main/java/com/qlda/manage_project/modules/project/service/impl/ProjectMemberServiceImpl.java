@@ -31,7 +31,8 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     public ProjectMemberRes addMember(Long currentUserId, Long projectId, AddMemberReq request) {
 
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ProjectNotFoundException("Không tìm thấy dự án"));
+                .filter(p -> !p.isDeleted())
+                .orElseThrow(() -> new ProjectNotFoundException("Không tìm thấy dự án với ID: " + projectId));
 
         ProjectMember currentUserMember = projectMemberRepository.findByProjectIdAndUserIdAndIsDeletedFalse(projectId, currentUserId)
                 .orElseThrow(() -> new ForbiddenException("Bạn không phải là thành viên của dự án này"));
