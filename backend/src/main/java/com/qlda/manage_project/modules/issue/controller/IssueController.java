@@ -50,7 +50,7 @@ public class IssueController {
         return ResponseEntity.noContent().build(); // HTTP 204
     }
 
-    @GetMapping("/ssues/{issueId}")
+    @GetMapping("/issues/{issueId}")
     public ResponseEntity<IssueResponse> viewDetailIssue(@PathVariable Long issueId) {
         IssueResponse response = issueService.viewDetailIssue(issueId);
         return ResponseEntity.ok(response);
