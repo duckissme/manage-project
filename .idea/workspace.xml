@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="8a084712-057d-41ab-8a6a-1bb68b938f83" name="Changes" comment="sixth commit">
+      <change beforePath="$PROJECT_DIR$/.gitattributes" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.mvn/wrapper/maven-wrapper.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mvnw" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mvnw.cmd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/ProjectApplication.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/common/exception/BadRequestException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/common/exception/ForbiddenException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/common/exception/GlobalExceptionHandler.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/common/exception/NotFoundException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/infrastructure/security/CustomUserDetails.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/infrastructure/security/CustomUserDetailsService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/infrastructure/security/JwtFilter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/infrastructure/security/JwtTokenProvider.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/auth/dto/request/LoginRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/auth/dto/request/RegisterRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/auth/dto/response/AuthResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/auth/dto/response/JwtResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/auth/service/AuthService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/auth/service/impl/AuthServiceImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/backlog/controller/BacklogController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/backlog/dto/response/IssueBacklogResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/backlog/service/BacklogService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/backlog/service/impl/BacklogServiceImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/issue/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/issue/controller/IssueController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/issue/converter/IssueConverter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/issue/dto/request/IssueCreateRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/issue/dto/request/IssueUpdateRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/issue/dto/response/IssueResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/issue/entity/Issue.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/issue/entity/IssueHistory.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/issue/entity/ProjectSequence.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/issue/enums/IssuePriority.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/issue/enums/IssueStatus.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/issue/enums/IssueType.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/issue/event/IssueUpdatedEvent.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/issue/listener/IssueHistoryListener.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/issue/repository/IssueHistoryRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/issue/repository/ProjectSequenceRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/controller/ProjectController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/controller/ProjectMemberController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/converter/ProjectConverter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/dto/request/AddMemberReq.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/dto/request/ProjectCreateReq.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/dto/request/ProjectUpdateReq.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/dto/response/ProjectDetailRes.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/dto/response/ProjectMemberRes.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/dto/response/ProjectRes.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/entity/Project.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/entity/ProjectMember.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/enums/ProjectRole.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/enums/ProjectStatus.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/exception/ProjectNotFoundException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/exception/UserAlreadyInProjectException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/repository/ProjectMemberRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/repository/ProjectRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/service/ProjectMemberService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/service/ProjectService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/service/impl/ProjectMemberServiceImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/project/service/impl/ProjectServiceImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/sprint/controller/SprintController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/sprint/dto/request/SprintCreateRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/sprint/dto/request/SprintUpdateRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/sprint/dto/response/SprintResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/sprint/entity/Sprint.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/sprint/enums/SprintStatus.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/sprint/repository/SprintRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/sprint/service/SprintService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/user/entity/RoleEntity.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/user/entity/UserEntity.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/user/repository/RoleRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/user/repository/UserRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/user/service/UserService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/qlda/manage_project/modules/user/service/impl/UserServiceImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/qlda/manage_project/ProjectApplicationTests.java" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="103" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Enum" />
+        <option value="package-info" />
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="backend" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;duckissme&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/duckissme/manage-project.git&quot;,
+    &quot;accountId&quot;: &quot;eb325ec5-73bd-4d42-9a00-a742c44646f5&quot;
+  }
+}</component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="3IJBt3HN7H1dWr71d7XkSb98lw7" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "Spring Boot.ProjectApplication.executor": "Run",
+    "git-widget-placeholder": "manage-project",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/project",
+    "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "mysql"
+    ]
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\project\backend" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="ProjectApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <option name="ALTERNATIVE_JRE_PATH" value="17" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UnknownPolicyInFreeMode" />
+      <module name="project" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.qlda.manage_project.ProjectApplication" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.qlda.manage_project.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Spring Boot.ProjectApplication" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.31033.145" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="8a084712-057d-41ab-8a6a-1bb68b938f83" name="Changes" comment="" />
+      <created>1787473004900</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1787473004900</updated>
+    </task>
+    <task id="LOCAL-00001" summary="commit second">
+      <option name="closed" value="true" />
+      <created>1787908883184</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1787908883184</updated>
+    </task>
+    <task id="LOCAL-00002" summary="third commit">
+      <option name="closed" value="true" />
+      <created>1787923790724</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1787923790725</updated>
+    </task>
+    <task id="LOCAL-00003" summary="commit module Issue">
+      <option name="closed" value="true" />
+      <created>1788058897847</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1788058897848</updated>
+    </task>
+    <task id="LOCAL-00004" summary="commit fourth">
+      <option name="closed" value="true" />
+      <created>1788062848807</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1788062848807</updated>
+    </task>
+    <task id="LOCAL-00005" summary="fifth commit">
+      <option name="closed" value="true" />
+      <created>1788102296840</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1788102296840</updated>
+    </task>
+    <task id="LOCAL-00006" summary="add db">
+      <option name="closed" value="true" />
+      <created>1789393856605</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1789393856605</updated>
+    </task>
+    <task id="LOCAL-00007" summary="sixth commit">
+      <option name="closed" value="true" />
+      <created>1789394267153</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1789394267153</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/manage-project" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="commit second" />
+    <MESSAGE value="third commit" />
+    <MESSAGE value="commit module Issue" />
+    <MESSAGE value="commit fourth" />
+    <MESSAGE value="fifth commit" />
+    <MESSAGE value="add db" />
+    <MESSAGE value="sixth commit" />
+    <option name="LAST_COMMIT_MESSAGE" value="sixth commit" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
