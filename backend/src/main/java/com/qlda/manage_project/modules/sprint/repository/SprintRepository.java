@@ -18,4 +18,6 @@ public interface SprintRepository extends JpaRepository<Sprint, Long> {
             Long projectId, List<SprintStatus> statuses);
 
     Optional<Sprint> findByIdAndProjectIdAndIsDeletedFalse(Long id, Long projectId);
+
+    boolean existsByProjectIdAndStatusAndIsDeletedFalse(Long projectId, SprintStatus status);
 }

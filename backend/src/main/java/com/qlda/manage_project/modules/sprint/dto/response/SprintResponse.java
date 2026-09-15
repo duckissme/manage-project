@@ -22,6 +22,12 @@ public class SprintResponse {
     private String status;
     private LocalDateTime createdAt;
 
+    private Integer totalTasks;
+    private Integer totalStoryPoints;
+    private Integer toDoPoints;
+    private Integer inProgressPoints;
+    private Integer donePoints;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<IssueBacklogResponse> issues;
 }

@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,5 +57,28 @@ public class SprintController {
         Long userId = customUserDetails.getId();
         sprintService.deleteSprint(projectId, sprintId, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{sprintId}/start")
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER')")
+    public ResponseEntity<SprintResponse> startSprint(
+            @PathVariable Long projectId,
+            @PathVariable Long sprintId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+        Long userId = customUserDetails.getId();
+        SprintResponse response = sprintService.startSprint(projectId, sprintId, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{sprintId}/complete")
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER')")
+    public ResponseEntity<SprintResponse> completeSprint(
+            @PathVariable Long projectId,
+            @PathVariable Long sprintId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        Long userId = customUserDetails.getId();
+        SprintResponse response = sprintService.completeSprint(projectId, sprintId, userId);
+        return ResponseEntity.ok(response);
     }
 }

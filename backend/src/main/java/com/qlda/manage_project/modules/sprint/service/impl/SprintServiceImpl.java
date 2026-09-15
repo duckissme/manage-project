@@ -1,9 +1,11 @@
 package com.qlda.manage_project.modules.sprint.service.impl;
 
+import com.qlda.manage_project.common.exception.BadRequestException;
 import com.qlda.manage_project.common.exception.ForbiddenException;
 import com.qlda.manage_project.common.exception.NotFoundException;
 import com.qlda.manage_project.modules.backlog.dto.response.IssueBacklogResponse;
 import com.qlda.manage_project.modules.issue.entity.Issue;
+import com.qlda.manage_project.modules.issue.enums.IssueStatus;
 import com.qlda.manage_project.modules.issue.event.IssueUpdatedEvent;
 import com.qlda.manage_project.modules.issue.repository.IssueRepository;
 import com.qlda.manage_project.modules.project.entity.ProjectMember;
@@ -16,6 +18,7 @@ import com.qlda.manage_project.modules.sprint.dto.request.SprintUpdateRequest;
 import com.qlda.manage_project.modules.sprint.dto.response.SprintResponse;
 import com.qlda.manage_project.modules.sprint.entity.Sprint;
 import com.qlda.manage_project.modules.sprint.enums.SprintStatus;
+import com.qlda.manage_project.modules.sprint.event.SprintStartedEvent;
 import com.qlda.manage_project.modules.sprint.repository.SprintRepository;
 import com.qlda.manage_project.modules.sprint.service.SprintService;
 import lombok.RequiredArgsConstructor;
@@ -42,13 +45,13 @@ public class SprintServiceImpl implements SprintService {
 
     @Transactional
     public SprintResponse createSprint(Long projectId, SprintCreateRequest request) {
-        projectRepository.findById(projectId).filter(p -> !p.isDeleted()).orElseThrow(() -> new ProjectNotFoundException("Không tìm thấy dự án với ID: " + projectId));
+        projectRepository.findById(projectId).filter(p -> !p.isDeleted())
+                .orElseThrow(() -> new ProjectNotFoundException("Không tìm thấy dự án với ID: " + projectId));
 
         String sprintName = request.getName();
         if (sprintName == null || sprintName.trim().isEmpty()) {
             long totalSprints = sprintRepository.countByProjectId(projectId);
             sprintName = "Sprint " + (totalSprints + 1);
-            log.info("Auto-generated sprint name: {} for Project ID: {}", sprintName, projectId);
         }
 
         Sprint newSprint = Sprint.builder()
@@ -65,12 +68,16 @@ public class SprintServiceImpl implements SprintService {
 
         Sprint savedSprint = sprintRepository.save(newSprint);
 
-        return SprintResponse.builder().id(savedSprint.getId()).projectId(savedSprint.getProjectId()).name(savedSprint.getName()).goal(savedSprint.getGoal()).startDate(savedSprint.getStartDate()).endDate(savedSprint.getEndDate()).status(savedSprint.getStatus().name()).createdAt(savedSprint.getCreatedAt()).build();
+        return SprintResponse.builder().id(savedSprint.getId()).projectId(savedSprint.getProjectId())
+                .name(savedSprint.getName()).goal(savedSprint.getGoal()).startDate(savedSprint.getStartDate())
+                .endDate(savedSprint.getEndDate()).status(savedSprint.getStatus().name())
+                .createdAt(savedSprint.getCreatedAt()).build();
     }
 
     @Transactional(readOnly = true)
     public List<SprintResponse> getSprintsWithIssues(Long projectId) {
-        projectRepository.findById(projectId).filter(p -> !p.isDeleted()).orElseThrow(() -> new ProjectNotFoundException("Không tìm thấy dự án với ID: " + projectId));
+        projectRepository.findById(projectId).filter(p -> !p.isDeleted())
+                .orElseThrow(() -> new ProjectNotFoundException("Không tìm thấy dự án với ID: " + projectId));
 
         List<SprintStatus> activeStatuses = List.of(SprintStatus.PENDING, SprintStatus.ACTIVE);
         List<Sprint> sprints = sprintRepository
@@ -94,6 +101,23 @@ public class SprintServiceImpl implements SprintService {
 
             List<Issue> issuesInThisSprint = issuesBySprintId.getOrDefault(sprint.getId(), Collections.emptyList());
 
+            int totalTasks = issuesInThisSprint.size();
+            int totalStoryPoints = issuesInThisSprint.stream()
+                    .mapToInt(issue -> issue.getStoryPoint() != null ? issue.getStoryPoint() : 0)
+                    .sum();
+            int toDoPoints = issuesInThisSprint.stream()
+                    .filter(issue -> issue.getStatus() == IssueStatus.TO_DO)
+                    .mapToInt(issue -> issue.getStoryPoint() != null ? issue.getStoryPoint() : 0)
+                    .sum();
+            int inProgressPoints = issuesInThisSprint.stream()
+                    .filter(issue -> issue.getStatus() == IssueStatus.IN_PROGRESS)
+                    .mapToInt(issue -> issue.getStoryPoint() != null ? issue.getStoryPoint() : 0)
+                    .sum();
+            int donePoints = issuesInThisSprint.stream()
+                    .filter(issue -> issue.getStatus() == IssueStatus.DONE)
+                    .mapToInt(issue -> issue.getStoryPoint() != null ? issue.getStoryPoint() : 0)
+                    .sum();
+
             List<IssueBacklogResponse> issueDTOs = issuesInThisSprint.stream()
                     .map(issue -> IssueBacklogResponse.builder()
                             .id(issue.getId())
@@ -114,6 +138,11 @@ public class SprintServiceImpl implements SprintService {
                     .endDate(sprint.getEndDate())
                     .status(sprint.getStatus().name())
                     .createdAt(sprint.getCreatedAt())
+                    .totalTasks(totalTasks)
+                    .totalStoryPoints(totalStoryPoints)
+                    .toDoPoints(toDoPoints)
+                    .inProgressPoints(inProgressPoints)
+                    .donePoints(donePoints)
                     .issues(issueDTOs)
                     .build();
 
@@ -122,9 +151,11 @@ public class SprintServiceImpl implements SprintService {
 
     @Transactional
     public SprintResponse updateSprint(Long projectId, Long sprintId, Long userId, SprintUpdateRequest request) {
-        projectRepository.findById(projectId).filter(p -> !p.isDeleted()).orElseThrow(() -> new ProjectNotFoundException("Không tìm thấy dự án với ID: " + projectId));
+        projectRepository.findById(projectId).filter(p -> !p.isDeleted())
+                .orElseThrow(() -> new ProjectNotFoundException("Không tìm thấy dự án với ID: " + projectId));
 
-        ProjectMember currentUserMember = projectMemberRepository.findByProjectIdAndUserIdAndIsDeletedFalse(projectId, userId)
+        ProjectMember currentUserMember = projectMemberRepository
+                .findByProjectIdAndUserIdAndIsDeletedFalse(projectId, userId)
                 .orElseThrow(() -> new ForbiddenException("Bạn không phải là thành viên của dự án này"));
 
         if (ProjectRole.OWNER != currentUserMember.getProjectRole()
@@ -165,7 +196,8 @@ public class SprintServiceImpl implements SprintService {
     @Transactional
     public void deleteSprint(Long projectId, Long sprintId, Long userId) {
 
-        ProjectMember currentUserMember = projectMemberRepository.findByProjectIdAndUserIdAndIsDeletedFalse(projectId, userId)
+        ProjectMember currentUserMember = projectMemberRepository
+                .findByProjectIdAndUserIdAndIsDeletedFalse(projectId, userId)
                 .orElseThrow(() -> new ForbiddenException("Bạn không phải là thành viên của dự án này"));
 
         if (ProjectRole.OWNER != currentUserMember.getProjectRole()
@@ -177,7 +209,8 @@ public class SprintServiceImpl implements SprintService {
                 .orElseThrow(() -> new NotFoundException("Sprint không tồn tại hoặc đã bị xóa"));
 
         // if (sprint.getStatus() == SprintStatus.ACTIVE) {
-        //     throw new BadRequestException("Không thể xóa Sprint đang trong quá trình chạy");
+        // throw new BadRequestException("Không thể xóa Sprint đang trong quá trình
+        // chạy");
         // }
 
         sprint.setDeleted(true);
@@ -192,14 +225,88 @@ public class SprintServiceImpl implements SprintService {
 
         for (Issue issue : issuesInSprint) {
             IssueUpdatedEvent.Change change = new IssueUpdatedEvent.Change(
-                    "Sprint", oldSprintName, newSprintName
-            );
+                    "Sprint", oldSprintName, newSprintName);
 
             eventPublisher.publishEvent(new IssueUpdatedEvent(
                     issue.getId(),
                     userId,
-                    List.of(change)
-            ));
+                    List.of(change)));
         }
+    }
+
+    @Transactional
+    @Override
+    public SprintResponse startSprint(Long projectId, Long sprintId, Long userId) {
+        Sprint sprint = sprintRepository.findByIdAndProjectIdAndIsDeletedFalse(sprintId, projectId)
+                .orElseThrow(() -> new NotFoundException("Sprint không tồn tại hoặc đã bị xóa"));
+
+        if (sprint.getStatus() != SprintStatus.PENDING) {
+            throw new BadRequestException("Chỉ có thể bắt đầu Sprint khi đang ở trạng thái PENDING");
+        }
+
+        if (sprintRepository.existsByProjectIdAndStatusAndIsDeletedFalse(projectId, SprintStatus.ACTIVE)) {
+            throw new BadRequestException("Dự án đã có một Sprint đang ở trạng thái ACTIVE");
+        }
+
+        if (!issueRepository.existsByProjectIdAndSprintIdAndIsDeletedFalse(projectId, sprintId)) {
+            throw new BadRequestException("Không thể bắt đầu Sprint khi chưa có issue nào");
+        }
+
+        sprint.setStatus(SprintStatus.ACTIVE);
+        eventPublisher.publishEvent(new SprintStartedEvent(
+                projectId, sprint.getId(), sprint.getName(), userId));
+
+        Sprint savedSprint = sprintRepository.save(sprint);
+
+        return SprintResponse.builder()
+                .id(savedSprint.getId())
+                .projectId(savedSprint.getProjectId())
+                .name(savedSprint.getName())
+                .goal(savedSprint.getGoal())
+                .startDate(savedSprint.getStartDate())
+                .endDate(savedSprint.getEndDate())
+                .status(savedSprint.getStatus().name())
+                .createdAt(savedSprint.getCreatedAt())
+                .build();
+    }
+
+    @Transactional
+    @Override
+    public SprintResponse completeSprint(Long projectId, Long sprintId, Long userId) {
+        Sprint sprint = sprintRepository.findByIdAndProjectIdAndIsDeletedFalse(sprintId, projectId)
+                .orElseThrow(() -> new NotFoundException("Sprint không tồn tại hoặc đã bị xóa"));
+        if (sprint.getStatus() != SprintStatus.ACTIVE) {
+            throw new BadRequestException("Chỉ có thể kết thúc Sprint khi đang ở trạng thái ACTIVE");
+        }
+        List<Issue> issuesInSprint = issueRepository.findByProjectIdAndSprintIdAndIsDeletedFalse(projectId, sprintId);
+
+        List<Issue> incompleteIssues = issuesInSprint.stream()
+                .filter(issue -> issue.getStatus() != IssueStatus.DONE)
+                .collect(Collectors.toList());
+        if (!incompleteIssues.isEmpty()) {
+            String sprintName = sprint.getName();
+            for (Issue issue : incompleteIssues) {
+                issue.setSprint(null);
+                IssueUpdatedEvent.Change change = new IssueUpdatedEvent.Change(
+                        "Sprint", sprintName, "Backlog (Sprint kết thúc)");
+                eventPublisher.publishEvent(new IssueUpdatedEvent(
+                        issue.getId(),
+                        userId,
+                        List.of(change)));
+            }
+            issueRepository.saveAll(incompleteIssues);
+        }
+        sprint.setStatus(SprintStatus.COMPLETED);
+        Sprint savedSprint = sprintRepository.save(sprint);
+        return SprintResponse.builder()
+                .id(savedSprint.getId())
+                .projectId(savedSprint.getProjectId())
+                .name(savedSprint.getName())
+                .goal(savedSprint.getGoal())
+                .startDate(savedSprint.getStartDate())
+                .endDate(savedSprint.getEndDate())
+                .status(savedSprint.getStatus().name())
+                .createdAt(savedSprint.getCreatedAt())
+                .build();
     }
 }

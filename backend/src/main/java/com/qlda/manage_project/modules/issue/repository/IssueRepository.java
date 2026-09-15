@@ -23,6 +23,8 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
     List<Issue> findByProjectIdAndSprintIdAndIsDeletedFalse(
             Long projectId, Long sprintId);
 
+    boolean existsByProjectIdAndSprintIdAndIsDeletedFalse(Long projectId, Long sprintId);
+
     @Modifying
     @Query("UPDATE Issue i SET i.sprint = null WHERE i.sprint.id = :sprintId AND i.projectId = :projectId")
     void clearSprintIdForIssues(@Param("sprintId") Long sprintId, @Param("projectId") Long projectId);

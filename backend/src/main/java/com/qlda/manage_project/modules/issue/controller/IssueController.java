@@ -3,6 +3,7 @@ package com.qlda.manage_project.modules.issue.controller;
 import com.qlda.manage_project.infrastructure.security.CustomUserDetails;
 import com.qlda.manage_project.modules.issue.dto.request.IssueCreateRequest;
 import com.qlda.manage_project.modules.issue.dto.request.IssueUpdateRequest;
+import com.qlda.manage_project.modules.issue.dto.request.MoveIssueRequest;
 import com.qlda.manage_project.modules.issue.dto.response.IssueResponse;
 import com.qlda.manage_project.modules.issue.service.IssueService;
 import jakarta.validation.Valid;
@@ -54,5 +55,19 @@ public class IssueController {
     public ResponseEntity<IssueResponse> viewDetailIssue(@PathVariable Long issueId) {
         IssueResponse response = issueService.viewDetailIssue(issueId);
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping
+    public ResponseEntity<Void> moveIssue(
+            @PathVariable Long projectId,
+            @PathVariable Long issueId,
+            @Valid @RequestBody MoveIssueRequest request,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+        Long userId = customUserDetails.getId();
+
+        issueService.moveIssue(projectId, issueId, request, userId);
+
+        return ResponseEntity.noContent().build(); // HTTP 204 No Content
     }
 }
