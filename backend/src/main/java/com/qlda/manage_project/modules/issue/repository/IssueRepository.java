@@ -2,6 +2,7 @@ package com.qlda.manage_project.modules.issue.repository;
 
 import com.qlda.manage_project.modules.issue.entity.Issue;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface IssueRepository extends JpaRepository<Issue, Long> {
+public interface IssueRepository extends JpaRepository<Issue, Long>, JpaSpecificationExecutor<Issue> {
     List<Issue> findByProjectIdAndSprintIsNullAndIsDeletedFalseOrderByCreatedAtDesc(Long projectId);
 
     @Modifying
