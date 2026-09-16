@@ -1,8 +1,8 @@
 DROP TABLE IF EXISTS `project_members`;
 DROP TABLE IF EXISTS `project_sequences`;
 DROP TABLE IF EXISTS `sprints`;
-DROP TABLE IF EXISTS `issues`;
 DROP TABLE IF EXISTS `issue_histories`;
+DROP TABLE IF EXISTS `issues`;
 DROP TABLE IF EXISTS `user`;
 DROP TABLE IF EXISTS `role`;
 DROP TABLE IF EXISTS `projects`;
@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS `user` (
 
 CREATE TABLE IF NOT EXISTS projects (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    project_key VARCHAR(10) NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
     description TEXT,
     start_date DATE,
@@ -66,10 +67,30 @@ CREATE TABLE IF NOT EXISTS project_members (
         UNIQUE (project_id, user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `sprints` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `project_id` BIGINT NOT NULL,
+    `name` VARCHAR(255) NOT NULL,
+    `goal` TEXT,
+    
+    `start_date` DATETIME NULL,
+    `end_date` DATETIME NULL,
+    `status` VARCHAR(50) DEFAULT 'PENDING' NOT NULL, -- Enum: PENDING, ACTIVE, COMPLETED
+    
+    `is_deleted` BOOLEAN DEFAULT FALSE NOT NULL,
+    
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    CONSTRAINT `fk_sprint_project` 
+        FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS issues (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     project_id BIGINT NOT NULL,          
     sprint_id BIGINT NULL,               
+    parent_id BIGINT NULL,               -- Tham chiếu đến Issue cha (Epic cho Task/Story, hoặc Task/Story cho Subtask)
     issue_key VARCHAR(50) NOT NULL,     
     
     issue_type VARCHAR(20) NOT NULL,     
@@ -100,9 +121,12 @@ CREATE TABLE IF NOT EXISTS issues (
 		FOREIGN KEY (`assignee_id`) REFERENCES `user`(`id`) ON DELETE SET NULL,
 	CONSTRAINT `fk_issue_sprint`
 		FOREIGN KEY (`sprint_id`) REFERENCES `sprints`(`id`) ON DELETE SET NULL,
+	CONSTRAINT `fk_issue_parent`
+		FOREIGN KEY (`parent_id`) REFERENCES `issues`(`id`) ON DELETE SET NULL,
       
     INDEX idx_project_sprint (project_id, sprint_id), 
-    INDEX idx_assignee (assignee_id)    
+    INDEX idx_assignee (assignee_id),
+    INDEX idx_parent (parent_id)    
 );
 
 CREATE TABLE IF NOT EXISTS project_sequences (
@@ -130,22 +154,3 @@ CREATE TABLE IF NOT EXISTS issue_histories (
     
     INDEX idx_issue_id (issue_id)        
 );
-
-CREATE TABLE IF NOT EXISTS `sprints` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `project_id` BIGINT NOT NULL,
-    `name` VARCHAR(255) NOT NULL,
-    `goal` TEXT,
-    
-    `start_date` DATETIME NULL,
-    `end_date` DATETIME NULL,
-    `status` VARCHAR(50) DEFAULT 'PENDING' NOT NULL, -- Enum: PENDING, ACTIVE, COMPLETED
-    
-    `is_deleted` BOOLEAN DEFAULT FALSE NOT NULL,
-    
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    CONSTRAINT `fk_sprint_project` 
-        FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
