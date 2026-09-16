@@ -51,6 +51,7 @@ public class BacklogServiceImpl implements BacklogService {
                 .issueType(issue.getIssueType().name())
                 .status(issue.getStatus().name())
                 .priority(issue.getPriority().name())
+                .parentId(issue.getParent().getId())
                 .createdAt(issue.getCreatedAt())
                 .build()
         ).collect(Collectors.toList());

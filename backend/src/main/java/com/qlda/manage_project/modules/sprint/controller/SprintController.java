@@ -1,6 +1,8 @@
 package com.qlda.manage_project.modules.sprint.controller;
 
 import com.qlda.manage_project.infrastructure.security.CustomUserDetails;
+import com.qlda.manage_project.modules.issue.enums.IssueStatus;
+import com.qlda.manage_project.modules.issue.enums.IssueType;
 import com.qlda.manage_project.modules.sprint.dto.request.SprintCreateRequest;
 import com.qlda.manage_project.modules.sprint.dto.request.SprintUpdateRequest;
 import com.qlda.manage_project.modules.sprint.dto.response.SprintResponse;
@@ -31,8 +33,15 @@ public class SprintController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SprintResponse>> getSprints(@PathVariable Long projectId) {
-        List<SprintResponse> response = sprintService.getSprintsWithIssues(projectId);
+    public ResponseEntity<List<SprintResponse>> getSprints(
+            @PathVariable Long projectId,
+            @RequestParam(required = false) IssueType issueType,
+            @RequestParam(required = false) Long assigneeId,
+            @RequestParam(required = false) IssueStatus issueStatus,
+            @RequestParam(required = false) String searchKeyword) {
+        List<SprintResponse> response = sprintService.getSprintsWithIssues(
+                projectId, issueType, assigneeId, issueStatus, searchKeyword
+        );
         return ResponseEntity.ok(response);
     }
 

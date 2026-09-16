@@ -13,6 +13,7 @@ public class ProjectConverter {
 
         return ProjectRes.builder()
                 .id(project.getId())
+                .projectKey(project.getProjectKey())
                 .name(project.getName())
                 .description(project.getDescription())
                 .status(project.getStatus())

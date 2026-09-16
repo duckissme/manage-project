@@ -10,14 +10,18 @@ import com.qlda.manage_project.modules.issue.dto.request.MoveIssueRequest;
 import com.qlda.manage_project.modules.issue.dto.response.IssueResponse;
 import com.qlda.manage_project.modules.issue.entity.Issue;
 import com.qlda.manage_project.modules.issue.entity.ProjectSequence;
+import com.qlda.manage_project.modules.issue.enums.IssuePriority;
 import com.qlda.manage_project.modules.issue.enums.IssueStatus;
+import com.qlda.manage_project.modules.issue.enums.IssueType;
 import com.qlda.manage_project.modules.issue.event.IssueUpdatedEvent;
 import com.qlda.manage_project.modules.issue.repository.IssueRepository;
 import com.qlda.manage_project.modules.issue.repository.ProjectSequenceRepository;
 import com.qlda.manage_project.modules.issue.service.IssueService;
+import com.qlda.manage_project.modules.project.entity.Project;
 import com.qlda.manage_project.modules.project.entity.ProjectMember;
 import com.qlda.manage_project.modules.project.enums.ProjectRole;
 import com.qlda.manage_project.modules.project.repository.ProjectMemberRepository;
+import com.qlda.manage_project.modules.project.repository.ProjectRepository;
 import com.qlda.manage_project.modules.sprint.entity.Sprint;
 import com.qlda.manage_project.modules.sprint.enums.SprintStatus;
 import com.qlda.manage_project.modules.sprint.repository.SprintRepository;
@@ -30,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,41 +42,66 @@ public class IssueServiceImpl implements IssueService {
     private final IssueRepository issueRepository;
     private final ProjectSequenceRepository sequenceRepository;
     private final ProjectMemberRepository projectMemberRepository;
+    private final ProjectRepository projectRepository;
     private final SprintRepository sprintRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final IssueConverter issueConverter;
 
     @Transactional
-    public IssueResponse createIssue(IssueCreateRequest request, Long reporterId, Long projectId, String projectKey) {
+    public IssueResponse createIssue(IssueCreateRequest request, Long reporterId, Long projectId) {
+        List<IssueResponse> responses = this.createBulk(List.of(request), reporterId, projectId);
 
-        ProjectSequence seq = sequenceRepository.findByProjectId(projectId).orElseThrow(() -> new NotFoundException("Không tìm thấy cấu hình project"));
+        return responses.get(0);
+    }
 
-        seq.setCurrentValue(seq.getCurrentValue() + 1);
+    @Transactional
+    public List<IssueResponse> createBulk(List<IssueCreateRequest> requests, Long reporterId, Long projectId) {
+
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new NotFoundException("Không tìm thấy project"));
+        ProjectSequence seq = sequenceRepository.findByProjectId(projectId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy cấu hình project"));
+
+        String projectKey = project.getProjectKey();
+        List<Issue> savedIssues = new ArrayList<>();
+
+        for (IssueCreateRequest request : requests) {
+
+            seq.setCurrentValue(seq.getCurrentValue() + 1);
+            String issueKey = projectKey + "-" + seq.getCurrentValue();
+
+            Issue issue = new Issue();
+            issue.setProject(project);
+            issue.setIssueKey(issueKey);
+            issue.setIssueType(request.getIssueType() != null ? request.getIssueType() : IssueType.USER_STORY);
+            issue.setTitle(request.getTitle());
+            issue.setPriority(request.getPriority() != null ? request.getPriority() : IssuePriority.MEDIUM);
+            issue.setDescription(request.getDescription());
+            issue.setAssigneeId(request.getAssigneeId());
+            issue.setDueDate(request.getDueDate());
+            issue.setReporterId(reporterId);
+            issue.setStatus(IssueStatus.TO_DO);
+
+            if (request.getParentId() != null) {
+                Issue parent = issueRepository.findByIdAndProjectIdAndIsDeletedFalse(request.getParentId(), projectId)
+                        .orElseThrow(() -> new NotFoundException("Không tìm thấy Issue cha với ID: " + request.getParentId()));
+                issue.setParent(parent);
+            }
+
+            Issue savedIssue = issueRepository.save(issue);
+            savedIssues.add(savedIssue);
+        }
+
         sequenceRepository.save(seq);
 
-        String issueKey = projectKey + "-" + seq.getCurrentValue();
-
-        Issue issue = new Issue();
-        issue.setProjectId(projectId);
-        issue.setIssueKey(issueKey);
-        issue.setIssueType(request.getIssueType());
-        issue.setTitle(request.getTitle());
-        issue.setPriority(request.getPriority());
-        issue.setDescription(request.getDescription());
-        issue.setStoryPoint(request.getStoryPoint());
-        issue.setAssigneeId(request.getAssigneeId());
-        issue.setDueDate(request.getDueDate());
-        issue.setReporterId(reporterId);
-        issue.setStatus(IssueStatus.TO_DO);
-
-        Issue savedIssue = issueRepository.save(issue);
-
-        return issueConverter.mapToResponse(savedIssue);
+        return savedIssues.stream()
+                .map(issueConverter::mapToResponse)
+                .collect(Collectors.toList());
     }
 
     @Transactional
     public IssueResponse updateIssue(Long issueId, IssueUpdateRequest request, Long actorId) {
-        Issue issue = issueRepository.findById(issueId).orElseThrow(() -> new NotFoundException("Không tìm thấy Issue"));
+        Issue issue = issueRepository.findById(issueId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy Issue"));
 
         List<IssueUpdatedEvent.Change> changes = new ArrayList<>();
 
@@ -82,20 +112,22 @@ public class IssueServiceImpl implements IssueService {
         }
 
         // So sánh Status
-        if (issue.getStatus() != request.getStatus()) {
+        if (request.getStatus() != null && issue.getStatus() != request.getStatus()) {
             changes.add(new IssueUpdatedEvent.Change("status", issue.getStatus().name(), request.getStatus().name()));
             issue.setStatus(request.getStatus());
         }
 
         // So sánh Issue Type
-        if (issue.getIssueType() != request.getIssueType()) {
-            changes.add(new IssueUpdatedEvent.Change("issueType", issue.getIssueType().name(), request.getIssueType().name()));
+        if (request.getIssueType() != null && issue.getIssueType() != request.getIssueType()) {
+            changes.add(new IssueUpdatedEvent.Change("issueType", issue.getIssueType().name(),
+                    request.getIssueType().name()));
             issue.setIssueType(request.getIssueType());
         }
 
         // So sánh Priority
-        if (issue.getPriority() != request.getPriority()) {
-            changes.add(new IssueUpdatedEvent.Change("priority", issue.getPriority().name(), request.getPriority().name()));
+        if (request.getPriority() != null && issue.getPriority() != request.getPriority()) {
+            changes.add(
+                    new IssueUpdatedEvent.Change("priority", issue.getPriority().name(), request.getPriority().name()));
             issue.setPriority(request.getPriority());
         }
 
@@ -107,20 +139,39 @@ public class IssueServiceImpl implements IssueService {
 
         // So sánh Assignee
         if (!Objects.equals(issue.getAssigneeId(), request.getAssigneeId())) {
-            changes.add(new IssueUpdatedEvent.Change("assigneeId", Objects.toString(issue.getAssigneeId(), null), Objects.toString(request.getAssigneeId(), null)));
+            changes.add(new IssueUpdatedEvent.Change("assigneeId", Objects.toString(issue.getAssigneeId(), null),
+                    Objects.toString(request.getAssigneeId(), null)));
             issue.setAssigneeId(request.getAssigneeId());
         }
 
         // So sánh Story Point
         if (!Objects.equals(issue.getStoryPoint(), request.getStoryPoint())) {
-            changes.add(new IssueUpdatedEvent.Change("storyPoint", Objects.toString(issue.getStoryPoint(), null), Objects.toString(request.getStoryPoint(), null)));
+            changes.add(new IssueUpdatedEvent.Change("storyPoint", Objects.toString(issue.getStoryPoint(), null),
+                    Objects.toString(request.getStoryPoint(), null)));
             issue.setStoryPoint(request.getStoryPoint());
         }
 
         // So sánh Due Date
         if (!Objects.equals(issue.getDueDate(), request.getDueDate())) {
-            changes.add(new IssueUpdatedEvent.Change("dueDate", Objects.toString(issue.getDueDate(), null), Objects.toString(request.getDueDate(), null)));
+            changes.add(new IssueUpdatedEvent.Change("dueDate", Objects.toString(issue.getDueDate(), null),
+                    Objects.toString(request.getDueDate(), null)));
             issue.setDueDate(request.getDueDate());
+        }
+
+        // So sánh Parent Issue
+        if (!Objects.equals(issue.getParent().getId(), request.getParentId())) {
+            if (request.getParentId() != null) {
+                if (request.getParentId().equals(issue.getId())) {
+                    throw new BadRequestException("Issue không thể làm cha của chính nó");
+                }
+                Issue parentIssue = issueRepository.findByIdAndProjectIdAndIsDeletedFalse(request.getParentId(), issue.getProject().getId())
+                        .orElseThrow(() -> new NotFoundException("Không tìm thấy Issue cha với ID: " + request.getParentId()));
+
+                issue.setParent(parentIssue);
+            }
+
+            changes.add(new IssueUpdatedEvent.Change("parentId", Objects.toString(issue.getParent().getId(), null),
+                    Objects.toString(request.getParentId(), null)));
         }
 
         Issue updatedIssue = issueRepository.save(issue);
@@ -134,9 +185,11 @@ public class IssueServiceImpl implements IssueService {
 
     @Transactional
     public void deleteIssue(Long issueId, Long actorId) {
-        Issue issue = issueRepository.findById(issueId).orElseThrow(() -> new NotFoundException("Không tìm thấy Issue"));
+        Issue issue = issueRepository.findById(issueId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy Issue"));
 
-        ProjectMember member = projectMemberRepository.findByProjectIdAndUserIdAndIsDeletedFalse(issue.getProjectId(), actorId)
+        ProjectMember member = projectMemberRepository
+                .findByProjectIdAndUserIdAndIsDeletedFalse(issue.getProject().getId(), actorId)
                 .orElseThrow(() -> new NotFoundException("Thành viên này không tồn tại trong dự án"));
 
         if (ProjectRole.OWNER != member.getProjectRole()
@@ -153,19 +206,18 @@ public class IssueServiceImpl implements IssueService {
         IssueUpdatedEvent.Change deleteChange = new IssueUpdatedEvent.Change(
                 "Status",
                 "Active",
-                "Deleted"
-        );
+                "Deleted");
 
         eventPublisher.publishEvent(new IssueUpdatedEvent(
                 issue.getId(),
                 actorId,
-                List.of(deleteChange)
-        ));
+                List.of(deleteChange)));
     }
 
     @Transactional(readOnly = true)
     public IssueResponse viewDetailIssue(Long issueId) {
-        Issue issue = issueRepository.findById(issueId).orElseThrow(() -> new NotFoundException("Không tìm thấy Issue"));
+        Issue issue = issueRepository.findById(issueId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy Issue"));
 
         return issueConverter.mapToResponse(issue);
     }
@@ -206,14 +258,45 @@ public class IssueServiceImpl implements IssueService {
             String newValue = (targetSprint != null) ? targetSprint.getName() : "Backlog";
 
             IssueUpdatedEvent.Change sprintChange = new IssueUpdatedEvent.Change(
-                    "Sprint", oldValue, newValue
-            );
+                    "Sprint", oldValue, newValue);
 
             eventPublisher.publishEvent(new IssueUpdatedEvent(
                     issue.getId(),
                     actorId,
-                    List.of(sprintChange)
-            ));
+                    List.of(sprintChange)));
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Long getProjectIdByIssueId(Long issueId) {
+        Issue issue = issueRepository.findByIdAndIsDeletedFalse(issueId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy Issue"));
+
+        return issue.getProject().getId();
+    }
+
+    @Transactional(readOnly = true)
+    public List<IssueResponse> getChildIssues(Long parentId) {
+        List<Issue> childIssues = issueRepository.findByParentId(parentId);
+
+        return childIssues.stream()
+                .map(issueConverter::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<IssueResponse> getIssues(Long projectId, IssueType type) {
+
+        List<Issue> issues;
+
+        if (type != null) {
+            issues = issueRepository.findByProjectIdAndIssueTypeAndIsDeletedFalse(projectId, type);
+        } else {
+            issues = issueRepository.findByProjectIdAndIsDeletedFalse(projectId);
+        }
+
+        return issues.stream()
+                .map(issueConverter::mapToResponse)
+                .collect(Collectors.toList());
     }
 }

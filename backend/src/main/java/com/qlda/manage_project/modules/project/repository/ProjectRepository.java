@@ -31,5 +31,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Query("UPDATE Project p SET p.isDeleted = true WHERE p.id = :id")
     void deleteProject(@Param("id") Long id);
 
+    boolean existsByProjectKey(String projectKey);
 
 }

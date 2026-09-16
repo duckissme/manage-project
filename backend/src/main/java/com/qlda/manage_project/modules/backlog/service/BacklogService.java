@@ -14,4 +14,8 @@ public interface BacklogService {
             IssueStatus issueStatus,
             String searchKeyword
     );
+
+    default List<IssueBacklogResponse> getBacklogIssues(Long projectId) {
+        return getBacklogIssues(projectId, null, null, null, null);
+    }
 }

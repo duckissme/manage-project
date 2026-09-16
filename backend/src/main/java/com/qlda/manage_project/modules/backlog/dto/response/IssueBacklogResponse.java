@@ -16,5 +16,6 @@ public class IssueBacklogResponse {
     private String issueType;
     private String status;
     private String priority;
+    private Long parentId;
     private LocalDateTime createdAt;
 }

@@ -15,8 +15,10 @@ public class ProjectSequence {
     private Long projectId;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", insertable = false, updatable = false)
+    @MapsId
+    @JoinColumn(name = "project_id")
     private Project project;
 
+    @Column(name = "current_value", nullable = false)
     private Integer currentValue = 0;
 }

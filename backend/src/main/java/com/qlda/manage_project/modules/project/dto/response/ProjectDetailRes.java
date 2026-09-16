@@ -13,6 +13,7 @@ import java.util.List;
 @Builder
 public class ProjectDetailRes {
     private Long id;
+    private String projectKey;
     private String name;
     private String description;
     private ProjectStatus status;

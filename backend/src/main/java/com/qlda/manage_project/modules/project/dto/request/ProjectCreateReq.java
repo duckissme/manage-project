@@ -12,6 +12,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProjectCreateReq {
+    private String projectKey;
     private String name;
     private String description;
     private LocalDate startDate;

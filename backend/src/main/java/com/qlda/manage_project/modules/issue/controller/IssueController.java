@@ -5,6 +5,7 @@ import com.qlda.manage_project.modules.issue.dto.request.IssueCreateRequest;
 import com.qlda.manage_project.modules.issue.dto.request.IssueUpdateRequest;
 import com.qlda.manage_project.modules.issue.dto.request.MoveIssueRequest;
 import com.qlda.manage_project.modules.issue.dto.response.IssueResponse;
+import com.qlda.manage_project.modules.issue.enums.IssueType;
 import com.qlda.manage_project.modules.issue.service.IssueService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,14 +25,25 @@ public class IssueController {
     @PostMapping("/projects/{projectId}/issues")
     public ResponseEntity<IssueResponse> createIssue(
             @PathVariable Long projectId,
-            @RequestParam String projectKey,
             @Valid @RequestBody IssueCreateRequest request,
             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
         Long userId = customUserDetails.getId();
 
-        IssueResponse response = issueService.createIssue(request, userId, projectId, projectKey);
+        IssueResponse response = issueService.createIssue(request, userId, projectId);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/projects/{projectId}/issues/bulk")
+    public ResponseEntity<List<IssueResponse>> createBulkIssues (
+            @PathVariable Long projectId,
+            @Valid @RequestBody List<IssueCreateRequest> requests,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+        Long userId = customUserDetails.getId();
+
+        List<IssueResponse> responses = issueService.createBulk(requests, userId, projectId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responses);
     }
 
     @PutMapping("/issues/{issueId}")
@@ -57,7 +71,7 @@ public class IssueController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping
+    @PatchMapping("/projects/{projectId}/issues/{issueId}/move")
     public ResponseEntity<Void> moveIssue(
             @PathVariable Long projectId,
             @PathVariable Long issueId,
@@ -69,5 +83,14 @@ public class IssueController {
         issueService.moveIssue(projectId, issueId, request, userId);
 
         return ResponseEntity.noContent().build(); // HTTP 204 No Content
+    }
+
+    @GetMapping("/projects/{projectId}/issues")
+    public ResponseEntity<List<IssueResponse>> getIssuesByProject(
+            @PathVariable Long projectId,
+            @RequestParam(required = false) IssueType type) {
+
+        List<IssueResponse> responses = issueService.getIssues(projectId, type);
+        return ResponseEntity.ok(responses);
     }
 }

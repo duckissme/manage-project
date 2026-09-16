@@ -41,7 +41,13 @@ public class ProjectServiceImpl implements ProjectService {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User không tồn tại"));
 
+        String formattedKey = request.getProjectKey().trim().toUpperCase().replaceAll("\\s+", "");
+        if (projectRepository.existsByProjectKey(formattedKey)) {
+            throw new IllegalArgumentException("Project Key '" + formattedKey + "' đã tồn tại trên hệ thống!");
+        }
+
         Project newProject = Project.builder()
+                .projectKey(formattedKey)
                 .name(request.getName())
                 .description(request.getDescription())
                 .startDate(request.getStartDate())

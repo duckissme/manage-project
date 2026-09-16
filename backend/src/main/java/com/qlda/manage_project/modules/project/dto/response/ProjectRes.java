@@ -12,6 +12,7 @@ import java.time.LocalDate;
 @Builder
 public class ProjectRes {
     private Long id;
+    private String projectKey;
     private String name;
     private String description;
     private ProjectStatus status;

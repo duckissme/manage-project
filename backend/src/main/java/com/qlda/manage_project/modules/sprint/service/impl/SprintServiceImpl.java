@@ -6,8 +6,10 @@ import com.qlda.manage_project.common.exception.NotFoundException;
 import com.qlda.manage_project.modules.backlog.dto.response.IssueBacklogResponse;
 import com.qlda.manage_project.modules.issue.entity.Issue;
 import com.qlda.manage_project.modules.issue.enums.IssueStatus;
+import com.qlda.manage_project.modules.issue.enums.IssueType;
 import com.qlda.manage_project.modules.issue.event.IssueUpdatedEvent;
 import com.qlda.manage_project.modules.issue.repository.IssueRepository;
+import com.qlda.manage_project.modules.issue.specification.IssueSpecification;
 import com.qlda.manage_project.modules.project.entity.ProjectMember;
 import com.qlda.manage_project.modules.project.enums.ProjectRole;
 import com.qlda.manage_project.modules.project.exception.ProjectNotFoundException;
@@ -24,6 +26,8 @@ import com.qlda.manage_project.modules.sprint.service.SprintService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,7 +79,13 @@ public class SprintServiceImpl implements SprintService {
     }
 
     @Transactional(readOnly = true)
-    public List<SprintResponse> getSprintsWithIssues(Long projectId) {
+    @Override
+    public List<SprintResponse> getSprintsWithIssues(
+            Long projectId,
+            IssueType issueType,
+            Long assigneeId,
+            IssueStatus issueStatus,
+            String searchKeyword) {
         projectRepository.findById(projectId).filter(p -> !p.isDeleted())
                 .orElseThrow(() -> new ProjectNotFoundException("Không tìm thấy dự án với ID: " + projectId));
 
@@ -91,10 +101,14 @@ public class SprintServiceImpl implements SprintService {
                 .map(Sprint::getId)
                 .collect(Collectors.toList());
 
-        List<Issue> sprintIssues = issueRepository
-                .findByProjectIdAndSprintIdInAndIsDeletedFalseOrderByPriorityDesc(projectId, sprintIds);
+        Specification<Issue> spec = IssueSpecification.filterSprintIssues(
+                projectId, sprintIds, issueType, assigneeId, issueStatus, searchKeyword
+        );
+
+        List<Issue> sprintIssues = issueRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "priority"));
 
         Map<Long, List<Issue>> issuesBySprintId = sprintIssues.stream()
+                .filter(issue -> issue.getSprint() != null)
                 .collect(Collectors.groupingBy(issue -> issue.getSprint().getId()));
 
         return sprints.stream().map(sprint -> {
@@ -122,9 +136,11 @@ public class SprintServiceImpl implements SprintService {
                     .map(issue -> IssueBacklogResponse.builder()
                             .id(issue.getId())
                             .issueKey(issue.getIssueKey())
+                            .title(issue.getTitle())
                             .issueType(issue.getIssueType().name())
                             .status(issue.getStatus().name())
                             .priority(issue.getPriority().name())
+                            .parentId(issue.getParent() != null ? issue.getParent().getId() : null)
                             .createdAt(issue.getCreatedAt())
                             .build())
                     .collect(Collectors.toList());

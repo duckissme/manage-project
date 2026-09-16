@@ -19,14 +19,12 @@ public class IssueCreateRequest {
     @NotBlank(message = "Tiêu đề không được để trống")
     private String title;
 
-    @NotNull(message = "Loại Issue không được để trống")
     private IssueType issueType;
 
-    @NotNull(message = "Mức độ ưu tiên không được để trống")
     private IssuePriority priority;
 
     private String description;
-    private Integer storyPoint;
     private Long assigneeId;
     private LocalDateTime dueDate;
+    private Long parentId;
 }

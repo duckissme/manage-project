@@ -14,7 +14,7 @@ public class IssueConverter {
 
         IssueResponse response = new IssueResponse();
         response.setId(issue.getId());
-        response.setProjectId(issue.getProjectId());
+        response.setProjectId(issue.getProject().getId());
         response.setSprintId(issue.getSprint().getId());
         response.setIssueKey(issue.getIssueKey());
         response.setIssueType(issue.getIssueType());

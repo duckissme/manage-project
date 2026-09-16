@@ -20,15 +20,9 @@ public class IssueHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "issue_id", nullable = false)
-    private Long issueId;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "issue_id", insertable = false, updatable = false)
     private Issue issue;
-
-    @Column(name = "actor_id", nullable = false)
-    private Long actorId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "actor_id", insertable = false, updatable = false)

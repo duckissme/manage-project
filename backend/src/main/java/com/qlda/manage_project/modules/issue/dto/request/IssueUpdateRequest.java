@@ -20,17 +20,15 @@ public class IssueUpdateRequest {
     @NotBlank(message = "Tiêu đề không được để trống")
     private String title;
 
-    @NotNull(message = "Trạng thái không được để trống")
     private IssueStatus status;
 
-    @NotNull(message = "Loại Issue không được để trống")
     private IssueType issueType;
 
-    @NotNull(message = "Mức độ ưu tiên không được để trống")
     private IssuePriority priority;
 
     private String description;
     private Integer storyPoint;
     private Long assigneeId;
     private LocalDateTime dueDate;
+    private Long parentId;
 }
