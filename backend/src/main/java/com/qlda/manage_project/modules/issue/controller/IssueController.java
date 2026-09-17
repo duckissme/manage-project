@@ -5,6 +5,7 @@ import com.qlda.manage_project.modules.issue.dto.request.IssueCreateRequest;
 import com.qlda.manage_project.modules.issue.dto.request.IssueUpdateRequest;
 import com.qlda.manage_project.modules.issue.dto.request.MoveIssueRequest;
 import com.qlda.manage_project.modules.issue.dto.response.IssueResponse;
+import com.qlda.manage_project.modules.issue.dto.response.IssueSummaryResponse;
 import com.qlda.manage_project.modules.issue.enums.IssueType;
 import com.qlda.manage_project.modules.issue.service.IssueService;
 import jakarta.validation.Valid;
@@ -23,26 +24,26 @@ public class IssueController {
     private final IssueService issueService;
 
     @PostMapping("/projects/{projectId}/issues")
-    public ResponseEntity<IssueResponse> createIssue(
+    public ResponseEntity<IssueSummaryResponse> createIssue(
             @PathVariable Long projectId,
             @Valid @RequestBody IssueCreateRequest request,
             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
         Long userId = customUserDetails.getId();
 
-        IssueResponse response = issueService.createIssue(request, userId, projectId);
+        IssueSummaryResponse response = issueService.createIssue(request, userId, projectId);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PostMapping("/projects/{projectId}/issues/bulk")
-    public ResponseEntity<List<IssueResponse>> createBulkIssues (
+    public ResponseEntity<List<IssueSummaryResponse>> createBulkIssues(
             @PathVariable Long projectId,
             @Valid @RequestBody List<IssueCreateRequest> requests,
             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
         Long userId = customUserDetails.getId();
 
-        List<IssueResponse> responses = issueService.createBulk(requests, userId, projectId);
+        List<IssueSummaryResponse> responses = issueService.createBulk(requests, userId, projectId);
         return ResponseEntity.status(HttpStatus.CREATED).body(responses);
     }
 
@@ -58,10 +59,13 @@ public class IssueController {
     }
 
     @DeleteMapping("/issues/{issueId}")
-    public ResponseEntity<Void> deleteIssue(@PathVariable Long issueId, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    public ResponseEntity<Void> deleteIssue(
+            @PathVariable Long issueId,
+            @RequestParam(required = false) Integer version,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         Long userId = customUserDetails.getId();
 
-        issueService.deleteIssue(issueId, userId);
+        issueService.deleteIssue(issueId, userId, version);
         return ResponseEntity.noContent().build(); // HTTP 204
     }
 
@@ -86,11 +90,14 @@ public class IssueController {
     }
 
     @GetMapping("/projects/{projectId}/issues")
-    public ResponseEntity<List<IssueResponse>> getIssuesByProject(
+    public ResponseEntity<List<IssueSummaryResponse>> getIssuesByProject(
             @PathVariable Long projectId,
-            @RequestParam(required = false) IssueType type) {
+            @RequestParam(required = false) IssueType type,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long excludeIssueId,
+            @RequestParam(required = false) Integer limit) {
 
-        List<IssueResponse> responses = issueService.getIssues(projectId, type);
+        List<IssueSummaryResponse> responses = issueService.getIssues(projectId, type, keyword, excludeIssueId, limit);
         return ResponseEntity.ok(responses);
     }
 }

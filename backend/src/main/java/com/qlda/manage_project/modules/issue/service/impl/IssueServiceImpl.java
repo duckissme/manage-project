@@ -8,6 +8,7 @@ import com.qlda.manage_project.modules.issue.dto.request.IssueCreateRequest;
 import com.qlda.manage_project.modules.issue.dto.request.IssueUpdateRequest;
 import com.qlda.manage_project.modules.issue.dto.request.MoveIssueRequest;
 import com.qlda.manage_project.modules.issue.dto.response.IssueResponse;
+import com.qlda.manage_project.modules.issue.dto.response.IssueSummaryResponse;
 import com.qlda.manage_project.modules.issue.entity.Issue;
 import com.qlda.manage_project.modules.issue.entity.ProjectSequence;
 import com.qlda.manage_project.modules.issue.enums.IssuePriority;
@@ -16,10 +17,13 @@ import com.qlda.manage_project.modules.issue.enums.IssueType;
 import com.qlda.manage_project.modules.issue.event.IssueUpdatedEvent;
 import com.qlda.manage_project.modules.issue.repository.IssueRepository;
 import com.qlda.manage_project.modules.issue.repository.ProjectSequenceRepository;
+import com.qlda.manage_project.modules.issue.service.IssueLinkService;
 import com.qlda.manage_project.modules.issue.service.IssueService;
+import com.qlda.manage_project.modules.issue.specification.IssueSpecification;
 import com.qlda.manage_project.modules.project.entity.Project;
 import com.qlda.manage_project.modules.project.entity.ProjectMember;
 import com.qlda.manage_project.modules.project.enums.ProjectRole;
+import com.qlda.manage_project.modules.project.exception.ProjectNotFoundException;
 import com.qlda.manage_project.modules.project.repository.ProjectMemberRepository;
 import com.qlda.manage_project.modules.project.repository.ProjectRepository;
 import com.qlda.manage_project.modules.sprint.entity.Sprint;
@@ -27,6 +31,10 @@ import com.qlda.manage_project.modules.sprint.enums.SprintStatus;
 import com.qlda.manage_project.modules.sprint.repository.SprintRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,16 +54,17 @@ public class IssueServiceImpl implements IssueService {
     private final SprintRepository sprintRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final IssueConverter issueConverter;
+    private final IssueLinkService issueLinkService;
 
     @Transactional
-    public IssueResponse createIssue(IssueCreateRequest request, Long reporterId, Long projectId) {
-        List<IssueResponse> responses = this.createBulk(List.of(request), reporterId, projectId);
+    public IssueSummaryResponse createIssue(IssueCreateRequest request, Long reporterId, Long projectId) {
+        List<IssueSummaryResponse> responses = this.createBulk(List.of(request), reporterId, projectId);
 
         return responses.get(0);
     }
 
     @Transactional
-    public List<IssueResponse> createBulk(List<IssueCreateRequest> requests, Long reporterId, Long projectId) {
+    public List<IssueSummaryResponse> createBulk(List<IssueCreateRequest> requests, Long reporterId, Long projectId) {
 
         Project project = projectRepository.findById(projectId).orElseThrow(() -> new NotFoundException("Không tìm thấy project"));
         ProjectSequence seq = sequenceRepository.findByProjectId(projectId)
@@ -94,7 +103,7 @@ public class IssueServiceImpl implements IssueService {
         sequenceRepository.save(seq);
 
         return savedIssues.stream()
-                .map(issueConverter::mapToResponse)
+                .map(issueConverter::mapToSummaryResponse)
                 .collect(Collectors.toList());
     }
 
@@ -102,6 +111,11 @@ public class IssueServiceImpl implements IssueService {
     public IssueResponse updateIssue(Long issueId, IssueUpdateRequest request, Long actorId) {
         Issue issue = issueRepository.findById(issueId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy Issue"));
+
+        // Kiểm tra Optimistic Locking (version)
+        if (!Objects.equals(issue.getVersion(), request.getVersion())) {
+            throw new BadRequestException("Dữ liệu đã bị thay đổi bởi người khác, vui lòng làm mới trang.");
+        }
 
         List<IssueUpdatedEvent.Change> changes = new ArrayList<>();
 
@@ -159,7 +173,8 @@ public class IssueServiceImpl implements IssueService {
         }
 
         // So sánh Parent Issue
-        if (!Objects.equals(issue.getParent().getId(), request.getParentId())) {
+        Long oldParentId = issue.getParent() != null ? issue.getParent().getId() : null;
+        if (!Objects.equals(oldParentId, request.getParentId())) {
             if (request.getParentId() != null) {
                 if (request.getParentId().equals(issue.getId())) {
                     throw new BadRequestException("Issue không thể làm cha của chính nó");
@@ -168,9 +183,11 @@ public class IssueServiceImpl implements IssueService {
                         .orElseThrow(() -> new NotFoundException("Không tìm thấy Issue cha với ID: " + request.getParentId()));
 
                 issue.setParent(parentIssue);
+            } else {
+                issue.setParent(null);
             }
 
-            changes.add(new IssueUpdatedEvent.Change("parentId", Objects.toString(issue.getParent().getId(), null),
+            changes.add(new IssueUpdatedEvent.Change("parentId", Objects.toString(oldParentId, null),
                     Objects.toString(request.getParentId(), null)));
         }
 
@@ -180,11 +197,13 @@ public class IssueServiceImpl implements IssueService {
             eventPublisher.publishEvent(new IssueUpdatedEvent(issueId, actorId, changes));
         }
 
-        return issueConverter.mapToResponse(updatedIssue);
+        IssueResponse response = issueConverter.mapToResponse(updatedIssue);
+        response.setLinks(issueLinkService.getLinksByIssue(issueId));
+        return response;
     }
 
     @Transactional
-    public void deleteIssue(Long issueId, Long actorId) {
+    public void deleteIssue(Long issueId, Long actorId, Integer version) {
         Issue issue = issueRepository.findById(issueId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy Issue"));
 
@@ -195,6 +214,11 @@ public class IssueServiceImpl implements IssueService {
         if (ProjectRole.OWNER != member.getProjectRole()
                 && ProjectRole.MANAGER != member.getProjectRole()) {
             throw new ForbiddenException("Chỉ OWNER hoặc MANAGER mới có quyền xóa Issue");
+        }
+
+        // Kiểm tra version nếu client truyền lên
+        if (version != null && !Objects.equals(issue.getVersion(), version)) {
+            throw new BadRequestException("Dữ liệu đã bị thay đổi bởi người khác, vui lòng làm mới trang.");
         }
 
         int updatedRows = issueRepository.softDeleteByIdAndVersion(issue.getId(), issue.getVersion());
@@ -219,7 +243,9 @@ public class IssueServiceImpl implements IssueService {
         Issue issue = issueRepository.findById(issueId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy Issue"));
 
-        return issueConverter.mapToResponse(issue);
+        IssueResponse response = issueConverter.mapToResponse(issue);
+        response.setLinks(issueLinkService.getLinksByIssue(issueId));
+        return response;
     }
 
     @Transactional
@@ -229,7 +255,7 @@ public class IssueServiceImpl implements IssueService {
                 .orElseThrow(() -> new NotFoundException("Issue không tồn tại hoặc đã bị xóa"));
 
         // 2. Kiểm tra Optimistic Locking (version)
-        if (!issue.getVersion().equals(request.getVersion())) {
+        if (!Objects.equals(issue.getVersion(), request.getVersion())) {
             throw new BadRequestException("Dữ liệu đã bị thay đổi bởi người khác, vui lòng làm mới trang.");
         }
 
@@ -276,27 +302,40 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Transactional(readOnly = true)
-    public List<IssueResponse> getChildIssues(Long parentId) {
+    public List<IssueSummaryResponse> getChildIssues(Long parentId) {
         List<Issue> childIssues = issueRepository.findByParentId(parentId);
 
         return childIssues.stream()
-                .map(issueConverter::mapToResponse)
+                .map(issueConverter::mapToSummaryResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<IssueResponse> getIssues(Long projectId, IssueType type) {
+    @Override
+    public List<IssueSummaryResponse> getIssues(
+            Long projectId,
+            IssueType type,
+            String keyword,
+            Long excludeIssueId,
+            Integer limit) {
+
+        projectRepository.findById(projectId)
+                .filter(p -> !p.isDeleted())
+                .orElseThrow(() -> new ProjectNotFoundException("Không tìm thấy dự án với ID: " + projectId));
+
+        Specification<Issue> spec = IssueSpecification.filterProjectIssues(projectId, type, keyword, excludeIssueId);
 
         List<Issue> issues;
-
-        if (type != null) {
-            issues = issueRepository.findByProjectIdAndIssueTypeAndIsDeletedFalse(projectId, type);
+        if (limit != null && limit > 0) {
+            Pageable pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "updatedAt"));
+            issues = issueRepository.findAll(spec, pageable).getContent();
         } else {
-            issues = issueRepository.findByProjectIdAndIsDeletedFalse(projectId);
+            Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+            issues = issueRepository.findAll(spec, sort);
         }
 
         return issues.stream()
-                .map(issueConverter::mapToResponse)
+                .map(issueConverter::mapToSummaryResponse)
                 .collect(Collectors.toList());
     }
 }

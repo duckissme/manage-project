@@ -31,4 +31,7 @@ public class IssueUpdateRequest {
     private Long assigneeId;
     private LocalDateTime dueDate;
     private Long parentId;
+
+    @NotNull(message = "Version không được để trống")
+    private Integer version;
 }

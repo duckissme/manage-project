@@ -14,5 +14,5 @@ public class MoveIssueRequest {
     private Long targetSprintId;
 
     @NotNull(message = "Version không được để trống")
-    private Long version;
+    private Integer version;
 }

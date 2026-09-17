@@ -50,6 +50,37 @@ public class IssueSpecification {
         };
     }
 
+    public static Specification<Issue> filterProjectIssues(
+            Long projectId,
+            IssueType issueType,
+            String keyword,
+            Long excludeIssueId) {
+
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            predicates.add(cb.equal(root.get("projectId"), projectId));
+            predicates.add(cb.isFalse(root.get("isDeleted")));
+
+            if (issueType != null) {
+                predicates.add(cb.equal(root.get("issueType"), issueType));
+            }
+
+            if (excludeIssueId != null) {
+                predicates.add(cb.notEqual(root.get("id"), excludeIssueId));
+            }
+
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String pattern = "%" + keyword.trim().toLowerCase() + "%";
+                Predicate keyLike = cb.like(cb.lower(root.get("issueKey")), pattern);
+                Predicate titleLike = cb.like(cb.lower(root.get("title")), pattern);
+                predicates.add(cb.or(keyLike, titleLike));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
     private static List<Predicate> buildCommonPredicates(
             Root<Issue> root,
             CriteriaBuilder cb,

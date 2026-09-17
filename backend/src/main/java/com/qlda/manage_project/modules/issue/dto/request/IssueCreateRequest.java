@@ -3,7 +3,6 @@ package com.qlda.manage_project.modules.issue.dto.request;
 import com.qlda.manage_project.modules.issue.enums.IssuePriority;
 import com.qlda.manage_project.modules.issue.enums.IssueType;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
