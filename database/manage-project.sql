@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS `issue_links`;
 DROP TABLE IF EXISTS `project_members`;
 DROP TABLE IF EXISTS `project_sequences`;
 DROP TABLE IF EXISTS `sprints`;
@@ -154,3 +155,23 @@ CREATE TABLE IF NOT EXISTS issue_histories (
     
     INDEX idx_issue_id (issue_id)        
 );
+
+CREATE TABLE IF NOT EXISTS issue_links (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    source_issue_id BIGINT NOT NULL,
+    target_issue_id BIGINT NOT NULL,
+    link_type VARCHAR(30) NOT NULL,
+    created_by BIGINT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT `fk_link_source` 
+        FOREIGN KEY (`source_issue_id`) REFERENCES `issues`(`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_link_target` 
+        FOREIGN KEY (`target_issue_id`) REFERENCES `issues`(`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_link_user` 
+        FOREIGN KEY (`created_by`) REFERENCES `user`(`id`) ON DELETE CASCADE,
+        
+    CONSTRAINT `chk_diff_issues` CHECK (source_issue_id <> target_issue_id),
+    UNIQUE KEY `uk_issue_link` (source_issue_id, target_issue_id, link_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
