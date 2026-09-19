@@ -97,6 +97,8 @@ public class IssueSpecification {
 
         if (issueType != null) {
             predicates.add(cb.equal(root.get("issueType"), issueType));
+        } else {
+            predicates.add(cb.notEqual(root.get("issueType"), IssueType.SUB_TASK));
         }
 
         if (assigneeId != null) {

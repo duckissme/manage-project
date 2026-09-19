@@ -94,6 +94,9 @@ public class IssueServiceImpl implements IssueService {
                 Issue parent = issueRepository.findByIdAndProjectIdAndIsDeletedFalse(request.getParentId(), projectId)
                         .orElseThrow(() -> new NotFoundException("Không tìm thấy Issue cha với ID: " + request.getParentId()));
                 issue.setParent(parent);
+                if (issue.getIssueType() == IssueType.SUB_TASK && parent.getSprint() != null) {
+                    issue.setSprint(parent.getSprint());
+                }
             }
 
             Issue savedIssue = issueRepository.save(issue);
@@ -254,7 +257,6 @@ public class IssueServiceImpl implements IssueService {
         Issue issue = issueRepository.findByIdAndProjectIdAndIsDeletedFalse(issueId, projectId)
                 .orElseThrow(() -> new NotFoundException("Issue không tồn tại hoặc đã bị xóa"));
 
-        // 2. Kiểm tra Optimistic Locking (version)
         if (!Objects.equals(issue.getVersion(), request.getVersion())) {
             throw new BadRequestException("Dữ liệu đã bị thay đổi bởi người khác, vui lòng làm mới trang.");
         }
@@ -279,6 +281,17 @@ public class IssueServiceImpl implements IssueService {
             issue.setSprint(targetSprint);
 
             issueRepository.save(issue);
+
+            // Đồng bộ sprint cho các subtask con theo Issue cha
+            List<Issue> childIssues = issueRepository.findByParentId(issue.getId());
+            if (!childIssues.isEmpty()) {
+                for (Issue child : childIssues) {
+                    if (child.getIssueType() == IssueType.SUB_TASK) {
+                        child.setSprint(targetSprint);
+                    }
+                }
+                issueRepository.saveAll(childIssues);
+            }
 
             String oldValue = (oldSprint != null) ? oldSprint.getName() : "Backlog";
             String newValue = (targetSprint != null) ? targetSprint.getName() : "Backlog";

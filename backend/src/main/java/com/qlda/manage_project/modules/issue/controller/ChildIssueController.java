@@ -3,6 +3,7 @@ package com.qlda.manage_project.modules.issue.controller;
 import com.qlda.manage_project.infrastructure.security.CustomUserDetails;
 import com.qlda.manage_project.modules.issue.dto.request.IssueCreateRequest;
 import com.qlda.manage_project.modules.issue.dto.response.IssueSummaryResponse;
+import com.qlda.manage_project.modules.issue.enums.IssueType;
 import com.qlda.manage_project.modules.issue.service.IssueService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,12 @@ public class ChildIssueController {
             @RequestBody @Valid List<IssueCreateRequest> requests,
             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
-        requests.forEach(req -> req.setParentId(issueId));
+        requests.forEach(req -> {
+            req.setParentId(issueId);
+            if (req.getIssueType() == null) {
+                req.setIssueType(IssueType.SUB_TASK);
+            }
+        });
 
         Long projectId = issueService.getProjectIdByIssueId(issueId);
         Long userId = customUserDetails.getId();

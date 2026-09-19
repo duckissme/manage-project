@@ -38,8 +38,9 @@ Module này chịu trách nhiệm quản lý các đơn vị công việc lõi c
   * Hỗ trợ tạo đồng thời danh sách nhiều Issue (`createBulk`) trong cùng một giao dịch. Kết quả trả về danh sách `IssueSummaryResponse`.
 * **Quản lý Issue con (Child Issues / Subtasks)**:
   * Cho phép truy vấn toàn bộ danh sách Issue con của một Issue cha (`GET /issues/{issueId}/children`).
-  * Cho phép tạo nhanh hàng loạt Subtask/Child Issue cho một Issue cha (`POST /issues/{issueId}/children`), hệ thống tự động gán `parentId` và kế thừa `projectId`. Kết quả trả về `IssueSummaryResponse`.
+  * Cho phép tạo nhanh hàng loạt Subtask/Child Issue cho một Issue cha (`POST /issues/{issueId}/children`), hệ thống tự động gán `parentId`, gán mặc định `issueType = SUB_TASK` (nếu không truyền) và kế thừa `projectId`. Kết quả trả về `IssueSummaryResponse`.
   * Ràng buộc tính toàn vẹn: Issue không được phép tự làm cha của chính nó (`parentId != id`).
+  * **Tách biệt Subtask khỏi Backlog & Sprint**: Danh sách Backlog và Sprint chính tự động loại bỏ các Issue loại `SUB_TASK` để giữ giao diện gọn gàng; Subtask tự động kế thừa Sprint của Issue cha khi tạo hoặc khi di chuyển Issue cha giữa các Sprint/Backlog.
 * **Liên kết công việc (Issue Linking)**:
   * **Phạm vi liên kết**: Cả 2 Issue tham gia liên kết phải tồn tại, chưa bị xóa mềm (`is_deleted = false`) và thuộc **cùng một dự án**.
   * **Chặn liên kết không hợp lệ**:
