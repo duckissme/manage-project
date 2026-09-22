@@ -1,0 +1,33 @@
+.project-list {
+  padding: 32px;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  &__loading {
+    display: flex;
+    justify-content: center;
+    margin-top: 64px;
+  }
+}
+
+.project-card {
+  cursor: pointer;
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+  }
+
+  &__member-count {
+    font-size: 12px;
+  }
+}
