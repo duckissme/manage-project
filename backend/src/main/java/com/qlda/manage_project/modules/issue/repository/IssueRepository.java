@@ -40,4 +40,9 @@ public interface IssueRepository extends JpaRepository<Issue, Long>, JpaSpecific
     List<Issue> findByProjectIdAndIsDeletedFalse(Long projectId);
 
     List<Issue> findByProjectIdAndIssueTypeAndIsDeletedFalse(Long projectId, IssueType issueType);
+
+    @Query("SELECT i FROM Issue i LEFT JOIN FETCH i.assignee " +
+           "WHERE i.project.id = :projectId AND i.isDeleted = false " +
+           "ORDER BY i.createdAt ASC")
+    List<Issue> findTimelineIssues(@Param("projectId") Long projectId);
 }

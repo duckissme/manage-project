@@ -1,4 +1,4 @@
-package com.qlda.manage_project.modules.issue.dto.response;
+package com.qlda.manage_project.modules.timeline.dto.response;
 
 import com.qlda.manage_project.modules.issue.enums.IssuePriority;
 import com.qlda.manage_project.modules.issue.enums.IssueStatus;
@@ -12,19 +12,19 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class IssueSummaryResponse {
+public class TimelineIssueResponse {
     private Long id;
-    private Long projectId;
-    private Long sprintId;
     private Long parentId;
+    private Long sprintId;
     private String issueKey;
     private IssueType issueType;
     private String title;
     private IssueStatus status;
     private IssuePriority priority;
-    private Integer storyPoint;
     private Long assigneeId;
+    private String assigneeName;
+    private String assigneeAvatar;
     private LocalDateTime startDate;
     private LocalDateTime dueDate;
-    private LocalDateTime createdAt;
+    private Integer version;
 }

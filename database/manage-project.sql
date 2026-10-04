@@ -104,6 +104,7 @@ CREATE TABLE IF NOT EXISTS issues (
     
     reporter_id BIGINT NOT NULL,         
     assignee_id BIGINT NULL,             
+    start_date DATETIME NULL,            -- Ngày bắt đầu (phục vụ Timeline / Gantt)
     due_date DATETIME NULL,              
     
     is_deleted BOOLEAN DEFAULT FALSE,    

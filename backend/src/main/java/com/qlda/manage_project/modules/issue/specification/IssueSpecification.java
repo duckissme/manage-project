@@ -59,7 +59,7 @@ public class IssueSpecification {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            predicates.add(cb.equal(root.get("projectId"), projectId));
+            predicates.add(cb.equal(root.get("project").get("id"), projectId));
             predicates.add(cb.isFalse(root.get("isDeleted")));
 
             if (issueType != null) {
@@ -92,7 +92,7 @@ public class IssueSpecification {
 
         List<Predicate> predicates = new ArrayList<>();
 
-        predicates.add(cb.equal(root.get("projectId"), projectId));
+        predicates.add(cb.equal(root.get("project").get("id"), projectId));
         predicates.add(cb.isFalse(root.get("isDeleted")));
 
         if (issueType != null) {

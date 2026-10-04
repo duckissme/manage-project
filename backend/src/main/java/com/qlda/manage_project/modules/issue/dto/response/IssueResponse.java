@@ -27,6 +27,7 @@ public class IssueResponse {
     private Long parentId;
     private Long reporterId;
     private Long assigneeId;
+    private LocalDateTime startDate;
     private LocalDateTime dueDate;
     private Integer version;
     private LocalDateTime createdAt;

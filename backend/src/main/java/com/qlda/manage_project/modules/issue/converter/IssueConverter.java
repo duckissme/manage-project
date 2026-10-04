@@ -27,6 +27,7 @@ public class IssueConverter {
                 .storyPoint(issue.getStoryPoint())
                 .reporterId(issue.getReporterId())
                 .assigneeId(issue.getAssigneeId())
+                .startDate(issue.getStartDate())
                 .dueDate(issue.getDueDate())
                 .version(issue.getVersion())
                 .createdAt(issue.getCreatedAt())
@@ -51,6 +52,7 @@ public class IssueConverter {
                 .priority(issue.getPriority())
                 .storyPoint(issue.getStoryPoint())
                 .assigneeId(issue.getAssigneeId())
+                .startDate(issue.getStartDate())
                 .dueDate(issue.getDueDate())
                 .createdAt(issue.getCreatedAt())
                 .build();

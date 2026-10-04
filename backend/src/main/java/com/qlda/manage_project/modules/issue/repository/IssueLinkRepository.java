@@ -25,4 +25,9 @@ public interface IssueLinkRepository extends JpaRepository<IssueLink, Long> {
     );
 
     boolean existsBySourceIssueIdAndTargetIssueId(Long sourceIssueId, Long targetIssueId);
+
+    @Query("SELECT il FROM IssueLink il " +
+           "WHERE il.linkType = :linkType AND il.sourceIssue.project.id = :projectId")
+    List<IssueLink> findByProjectIdAndLinkType(@Param("projectId") Long projectId,
+                                               @Param("linkType") IssueLinkType linkType);
 }

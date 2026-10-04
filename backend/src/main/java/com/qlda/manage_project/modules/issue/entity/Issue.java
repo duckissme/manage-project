@@ -29,7 +29,7 @@ public class Issue {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", insertable = false, updatable = false)
+    @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -37,7 +37,7 @@ public class Issue {
     private Sprint sprint;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id", insertable = false, updatable = false)
+    @JoinColumn(name = "parent_id")
     private Issue parent;
 
     @Column(name = "issue_key", nullable = false, unique = true)
@@ -77,6 +77,9 @@ public class Issue {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assignee_id", insertable = false, updatable = false)
     private UserEntity assignee;
+
+    @Column(name = "start_date")
+    private LocalDateTime startDate;
 
     @Column(name = "due_date")
     private LocalDateTime dueDate;

@@ -39,6 +39,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -86,6 +87,8 @@ public class IssueServiceImpl implements IssueService {
             issue.setPriority(request.getPriority() != null ? request.getPriority() : IssuePriority.MEDIUM);
             issue.setDescription(request.getDescription());
             issue.setAssigneeId(request.getAssigneeId());
+            validateDateRange(request.getStartDate(), request.getDueDate());
+            issue.setStartDate(request.getStartDate());
             issue.setDueDate(request.getDueDate());
             issue.setReporterId(reporterId);
             issue.setStatus(IssueStatus.TO_DO);
@@ -166,6 +169,15 @@ public class IssueServiceImpl implements IssueService {
             changes.add(new IssueUpdatedEvent.Change("storyPoint", Objects.toString(issue.getStoryPoint(), null),
                     Objects.toString(request.getStoryPoint(), null)));
             issue.setStoryPoint(request.getStoryPoint());
+        }
+
+        validateDateRange(request.getStartDate(), request.getDueDate());
+
+        // So sánh Start Date
+        if (!Objects.equals(issue.getStartDate(), request.getStartDate())) {
+            changes.add(new IssueUpdatedEvent.Change("startDate", Objects.toString(issue.getStartDate(), null),
+                    Objects.toString(request.getStartDate(), null)));
+            issue.setStartDate(request.getStartDate());
         }
 
         // So sánh Due Date
@@ -350,5 +362,11 @@ public class IssueServiceImpl implements IssueService {
         return issues.stream()
                 .map(issueConverter::mapToSummaryResponse)
                 .collect(Collectors.toList());
+    }
+
+    private void validateDateRange(LocalDateTime startDate, LocalDateTime dueDate) {
+        if (startDate != null && dueDate != null && startDate.isAfter(dueDate)) {
+            throw new BadRequestException("Ngày bắt đầu không được sau ngày kết thúc");
+        }
     }
 }

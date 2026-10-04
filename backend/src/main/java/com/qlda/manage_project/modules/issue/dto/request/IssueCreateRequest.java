@@ -24,6 +24,7 @@ public class IssueCreateRequest {
 
     private String description;
     private Long assigneeId;
+    private LocalDateTime startDate;
     private LocalDateTime dueDate;
     private Long parentId;
 }

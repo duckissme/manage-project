@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/projects/{projectId}/backlog")
+@RequestMapping("/projects/{projectId}/backlog")
 @RequiredArgsConstructor
 public class BacklogController {
 

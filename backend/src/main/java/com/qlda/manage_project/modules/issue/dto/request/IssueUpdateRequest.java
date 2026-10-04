@@ -29,6 +29,7 @@ public class IssueUpdateRequest {
     private String description;
     private Integer storyPoint;
     private Long assigneeId;
+    private LocalDateTime startDate;
     private LocalDateTime dueDate;
     private Long parentId;
 
