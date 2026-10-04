@@ -1,9 +1,9 @@
 DROP TABLE IF EXISTS `issue_links`;
 DROP TABLE IF EXISTS `project_members`;
 DROP TABLE IF EXISTS `project_sequences`;
-DROP TABLE IF EXISTS `sprints`;
 DROP TABLE IF EXISTS `issue_histories`;
 DROP TABLE IF EXISTS `issues`;
+DROP TABLE IF EXISTS `sprints`;
 DROP TABLE IF EXISTS `user`;
 DROP TABLE IF EXISTS `role`;
 DROP TABLE IF EXISTS `projects`;
